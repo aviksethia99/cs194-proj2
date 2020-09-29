@@ -1,0 +1,576 @@
+<html>
+<head>
+<style>
+  body {
+    padding: 120px;
+    width: 1000px;
+    margin: auto;
+    text-align: left;
+    font-weight: 380;
+    font-family: 'Open Sans', sans-serif;
+    color: #121212;
+    background-color: white;
+  }
+  h1, h2, h3, h4 {
+    font-family: 'Source Sans Pro', sans-serif;
+  }
+</style>
+<title>CS 194-26 Images of the Russian Empire</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Sans+Pro" rel="stylesheet">
+<script type="text/javascript" src="http://latex.codecogs.com/latexit.js"></script>
+</head>
+
+<body>
+
+<h1 align="middle">CS 194-26, Fall 2020</h1>
+<h1 align="middle">Fun with Filters and Frequencies</h1>
+<h2 align="middle">Avik Sethia, CS194-26</h2>
+<h2 align="middle">HTML template credits:Charley Huang</h2>
+
+<br><br>
+
+<div>
+<h2 align="middle">Summary</h2>
+  <p align="middle">I had an absolutely wonderful time exploring frequencies
+    and the cool image manipulation you can do with convolution. Here are a
+    few of the results and observations I made. </p>
+
+<h2 align="middle">Part 1.1: Finite Difference Operator</h2>
+  <p>As a first step I convolved the image of the cameraman with [[1], [-1]] and [1, -1].
+    This effectively gives us the partial derivatives of the image. I then found the magnitude of the
+    gradients by taking the root of the summed squares of both the x and y partial derivatives. I then played
+    around with thresholds at which I would consider a gradient magnitude to be an edge and used those values
+    as thresholds to binarize the image(The image below corresponds to a threshold of 0.18).</p>
+  <div align="center">
+    <table style="width=100%">
+      <tr>
+        <td align="middle">
+          <img src="cameraman.png" width="300" />
+          <figcaption align="middle">Original Image</figcaption>
+        </td>
+        <td align="middle">
+          <img src="cameraman_mag.png" width="300" />
+          <figcaption align="middle">Gradient Magnitude Image</figcaption>
+        </td>
+        <td align="middle">
+          <img src="cameraman_edge.png" width="300px" />
+          <figcaption align="middle">Edge Image</figcaption>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+<h2 align="middle">Part 1.2: Derivative of Gaussian (DoG) Filter</h2>
+    <p> As we can see above, the image above is slightly noisy at the bottom in general.
+      I used a Derivative of Gaussian (DoG) Filter to solve this proble. How this works is we
+      first convolve an image with a 2D Gaussian kernel of a size that you think produces the
+      best results.We the have to binarize thus image which can be achieved through 2 contrasting
+      approaches. The first of these ways was applying the gaussian filter and then finidng the gradient
+      magnitude values as demonstrated on 1.1. I then binarized the image using a gradient
+      magnitude threshold.
+      The second way involved finding the gaussian filter's derivatives as well and then applying
+      these gaussian filter derivatives to to the image's partial derivatives using convolution. To
+      verify the consistency in both apporaches, I confirmed that both approaches with the same
+      thresholding seem to output almost identical images. There also seems to be a visible
+      decrease in noise with edges that are a lot more prominent.
+    </p>
+    <div align="center">
+      <table style="width=100%">
+        <tr>
+          <td align="middle">
+            <img src="cameraman_dog.png" width="450" />
+            <figcaption align="middle">Edges of Gaussian Blurred Image</figcaption>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+<h2 align="middle">Part 1.3: Image Straightening</h2>
+    <p>In order to straighten images I calculated the gradient angles using the
+      inverse tan function (Since we have the x gradient and the y gradient,
+      the tan inverse would give you the angle of the gradient magnitude). I then
+       searched over a range of rotation angles to find the optimal rotation angle.
+       Optimality over here is defined by the concentration of (The absolute value) of angles
+       within a certain range of 0, 90 degrees and 180 degrees( Vertical and Horizontal edges)
+       as these will intuitively be maximised when an image is straight. Below are some
+       before/after pictures along with their accompanying angle histograms.
+     </p>
+    <div align="center">
+      <h3 align="middle">Facade</h2>
+      <table style="width=100%">
+        <tr>
+          <td align="middle">
+            <img src="facade.jpg" width="450" />
+            <figcaption align="middle">Original Image</figcaption>
+          </td>
+          <td align="middle">
+            <img src="facade_rotated.png" width="450px" />
+            <figcaption align="middle">Straightened Image(Rotation angle of -3 degrees)</figcaption>
+          </td>
+        </tr>
+        <tr>
+          <td align="middle">
+            <img src="facade_hist.png" width="400px" />
+            <figcaption align="middle">Original Gradient Angles</figcaption>
+          </td>
+          <td align="middle">
+            <img src="facade_rotated_hist.jpg" width="400px" />
+            <figcaption align="middle">Straightened Gradient Angles</figcaption>
+          </td>
+        </tr>
+      </table>
+      <h3 align="middle">Concert </h2>
+      <table style="width=100%">
+        <tr>
+          <td align="middle">
+            <img src="tilted_concert.jpg" width="450px" />
+            <figcaption align="middle">Original Image</figcaption>
+          </td>
+          <td align="middle">
+            <img src="tilted_concert_rotated.png" width="450px" />
+            <figcaption align="middle">Straightened Image(Rotation angle of 9 degrees)</figcaption>
+          </td>
+        </tr>
+        <tr>
+          <td align="middle">
+            <img src="hist_concert.png" width="400px" />
+            <figcaption align="middle">Original Gradient Angles</figcaption>
+          </td>
+          <td align="middle">
+            <img src="hist_concert_rotated.png" width="400px" />
+            <figcaption align="middle">Straightened Gradient Angles</figcaption>
+          </td>
+        </tr>
+      </table>
+      <h3 align="middle">City view</h2>
+      <table style="width=100%">
+        <tr>
+          <td align="middle">
+            <img src="skyline.png" width="450px" />
+            <figcaption align="middle">Original Image</figcaption>
+          </td>
+          <td align="middle">
+            <img src="skyline_rotated.png" width="450px" />
+            <figcaption align="middle">Straightened Image(Rotation angle of 7 degrees)</figcaption>
+          </td>
+        </tr>
+        <tr>
+          <td align="middle">
+            <img src="skyline_hist.png" width="400px" />
+            <figcaption align="middle">Original Gradient Angles</figcaption>
+          </td>
+          <td align="middle">
+            <img src="skyline_hist_rotated.png" width="400px" />
+            <figcaption align="middle">Straightened Gradient Angles</figcaption>
+          </td>
+        </tr>
+      </table>
+      <h3 align="middle">Earth Quake</h2>
+      <table style="width=100%">
+        <tr>
+          <td align="middle">
+            <img src="earthquake.jpg" width="450px" />
+            <figcaption align="middle">Original Image</figcaption>
+          </td>
+          <td align="middle">
+            <img src="earthquake_rotated.png" width="450px" />
+            <figcaption align="middle">Straightened Image(Rotation angle of 28 degrees)</figcaption>
+          </td>
+        </tr>
+        <tr>
+          <td align="middle">
+            <img src="earthquake_hist.png" width="400px" />
+            <figcaption align="middle">Original Gradient Angles</figcaption>
+          </td>
+          <td align="middle">
+            <img src="earthquake_hist_rotated.png" width="400px" />
+            <figcaption align="middle">Straightened Gradient Angles</figcaption>
+          </td>
+        </tr>
+      </table>
+      <h3 align="middle">Tree</h2>
+      <p align='left'>My straightening function "failed to straighten" the tree in
+        this image as it suggested an optimal rotation angle of 0. I think its because
+        of the presence of evreything else except the man and the tree being stright as is.
+        These straight edges might have overriden the diagonal edges of the tree and hence
+        resulted in an optimal angle output of 0
+      </p>
+      <table style="width=100%">
+        <tr>
+          <td align="middle">
+            <img src="tree.jpg" width="450px" />
+            <figcaption align="middle">Original Image</figcaption>
+          </td>
+          <td align="middle">
+            <img src="tree.jpg" width="450px" />
+            <figcaption align="middle">"Straightened (Not quite)Image"</figcaption>
+          </td>
+        </tr>
+        <tr>
+          <td align="middle">
+            <img src="tree_hist.png" width="400px" />
+            <figcaption align="middle">Original Gradient Angles</figcaption>
+          </td>
+          <td align="middle">
+            <img src="tree_hist.png" width="400px" />
+            <figcaption align="middle">"Straightened"Gradient Angles</figcaption>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+<h2 align="middle">Part 2.1: Image "Sharpening"</h2>
+    <p>I subtracted the blurred images(achieved using gaussian blurring) I got  from the original to get t
+      he high frequencies of the image, and then added these high frequencies back to the original image.
+      to make the images look a lot sharper. I chose a couple of images that have personal significance to
+        like my favorite cricketer.
+      </p>
+    <div align="center">
+      <h3 align="middle">Taj Mahal</h2>
+      <table style="width=100%">
+        <tr>
+          <td align="middle">
+            <img src="taj.jpg" width="450px" />
+            <figcaption align="middle">Original Image</figcaption>
+          </td>
+          <td align="middle">
+            <img src="taj_sharp.png" width="450px" />
+            <figcaption align="middle">"Sharpened" Image</figcaption>
+          </td>
+        </tr>
+      </table>
+      <h3 align="middle">Rahul Dravid</h2>
+      <table style="width=100%">
+        <tr>
+          <td align="middle">
+            <img src="dravid.jpg" width="450px" />
+            <figcaption align="middle">Original Image</figcaption>
+          </td>
+          <td align="middle">
+            <img src="dravid_sharp.png" width="450px" />
+            <figcaption align="middle">"Sharpened" Image</figcaption>
+          </td>
+        </tr>
+      </table>
+      <h3 align="middle">Blurred Dog</h2>
+      <table style="width=100%">
+        <tr>
+          <td align="middle">
+            <img src="dog.jpg" width="450px" />
+            <figcaption align="middle">Original Image</figcaption
+          </td>
+          <td align="middle">
+            <img src="dog_sharp.png" width="450px" />
+            <figcaption align="middle">"Sharpened" Image</figcaption>
+          </td>
+        </tr>
+      </table>
+      <h3 align="middle">Elvis</h2>
+      <table style="width=100%">
+        <tr>
+          <td align="middle">
+            <img src="baby.jpg" width="450px" />
+            <figcaption align="middle">Original Image</figcaption>
+          </td>
+          <td align="middle">
+            <img src="baby_sharp.png" width="450px" />
+            <figcaption align="middle">"Sharpened" Image</figcaption>
+          </td>
+        </tr>
+      </table>
+      <table style="width=100%">
+        <h3 align="middle">Eagle</h2>
+        <p align="left">For this next example, I took an already sharp image of an eagle
+          and repeated the same thing. The difference in sharpness is as expected not nearly
+          as tangible as they were int he blurred images but the beak in partocular does l
+          ook visibly sharper.
+        </p>
+        <tr>
+          <td align="middle">
+            <img src="eagle.jpg" width="300px" />
+            <figcaption align="middle">Original Image</figcaption>
+          </td>
+          <td align="middle">
+            <img src="eagle_blurred.png" width="300px" />
+            <figcaption align="middle">Blurred Image</figcaption>
+          </td>
+          <td align="middle">
+            <img src="eagle_sharp.png" width="300" />
+            <figcaption align="middle">Resharpened Image</figcaption>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+<h2 align="middle">Part 2.2: Hybrid Images (with Bells and Whistles)</h2>
+    <div align="center">
+        <table style="width=100%">
+          <h3 align="middle">Bale vs Cute Dog</h2>
+          <tr>
+            <td align="middle">
+              <img src="bale.jpg" width="300px" />
+            </td>
+            <td align="middle">
+              <img src="cute_dog.jpg" width="300px" />
+            </td>
+            <td align="middle">
+              <img src="bale_dog.png" width="300" />
+            </td>
+          </tr>
+        </table>
+        <table style="width=100%">
+          <h3 align="middle">Bale vs Batman</h2>
+          <tr>
+            <td align="middle">
+              <img src="bale.jpg" width="300px" />
+            </td>
+            <td align="middle">
+              <img src="batman.jpg" width="300px" />
+            </td>
+            <td align="middle">
+              <img src="bale-batman.png" width="300" />
+            </td>
+          </tr>
+        </table>
+        <table style="width=100%">
+          <h3 align="middle">Tom holland and Spiderman</h2>
+          <p align="left"> Here are the log magnitude of
+              the Fourier transform for both the input images and output image.</p>
+          <tr>
+            <td align="middle">
+              <img src="tom.jpg" width="300px" />
+            </td>
+            <td align="middle">
+              <img src="spiderman.jpg" width="300px" />
+            </td>
+            <td align="middle">
+              <img src="tom_spiderman.png" width="300" />
+            </td>
+          </tr>
+          <tr>
+            <td align="middle">
+              <img src="tom_fft.png" width="300px" />
+            </td>
+            <td align="middle">
+              <img src="spiderman_fft.png" width="300px" />
+            </td>
+            <td align="middle">
+              <img src="combined_fft.png" width="300" />
+            </td>
+          </tr>
+        </table>
+        <table style="width=100%">
+          <h3 align="middle">Moon in Manhattan</h2>
+          <p align="left">Here is a failure case of an attempted hybrid between the moon and
+            the manhattan skyline. This failed because of the inherently dofferent shapes and
+            objects  involved over here which made any kind of coherent alignment very hard to do.</p>
+          <tr>
+            <td align="middle">
+              <img src="moon.jpg" width="300px" />
+            </td>
+            <td align="middle">
+              <img src="nyc.jpg" width="300px" />
+            </td>
+            <td align="middle">
+              <img src="moon_nyc.png" width="300" />
+            </td>
+          </tr>
+        </table>
+      </div>
+
+<h2 align="middle">Part 2.3: Gaussian and Laplacian Stacks</h2>
+  <p> Here are my Gaussian and Lapalacian stacks till 5 levels with sigma levels[1,3,5,10,20]. I did this for the lincoln
+    image and my favorite hybrid image(Tom holland + Spiderman)
+  </p>
+  <div align="center">
+      <table style="width=100%">
+        <h3 align="middle">Lincoln</h2>
+        <tr>
+          <td align="middle">
+            <img src="lincoln.jpg" width="150" />
+            <figcaption align="middle">Original Image</figcaption>
+          </td>
+          <td align="middle">
+            <img src="lincoln_gaussian_0.png" width="150" />
+          </td>
+          <td align="middle">
+            <img src="lincoln_gaussian_1.png" width="150" />
+          </td>
+          <td align="middle">
+            <img src="lincoln_gaussian_2.png" width="150" />
+          </td>
+          <td align="middle">
+            <img src="lincoln_gaussian_3.png" width="150" />
+          </td>
+          <td align="middle">
+            <img src="lincoln_gaussian_4.png" width="150" />
+          </td>
+        </tr>
+        <tr>
+          <td align="middle">
+            <img src="lincoln.jpg" width="150" />
+          </td>
+          <td align="middle">
+            <img src="lincoln_lapalacian_0.png" width="150" />
+          </td>
+          <td align="middle">
+            <img src="lincoln_lapalacian_1.png" width="150" />
+          </td>
+          <td align="middle">
+            <img src="lincoln_lapalacian_2.png" width="150" />
+          </td>
+          <td align="middle">
+            <img src="lincoln_lapalacian_3.png" width="150" />
+          </td>
+          <td align="middle">
+            <img src="lincoln_lapalacian_4.png" width="150" />
+          </td>
+        </tr>
+      </table>
+      <table style="width=100%">
+        <h3 align="middle">Tom Holland-Spiderman Hybrid</h2>
+        <tr>
+          <td align="middle">
+            <img src="tom_spiderman.png" width="150" />
+            <figcaption align="middle">Original Image</figcaption>
+          </td>
+          <td align="middle">
+            <img src="tom_gauss_0.png" width="150" />
+          </td>
+          <td align="middle">
+            <img src="tom_gauss_1.png" width="150" />
+          </td>
+          <td align="middle">
+            <img src="tom_gauss_2.png" width="150" />
+          </td>
+          <td align="middle">
+            <img src="tom_gauss_3.png" width="150" />
+          </td>
+          <td align="middle">
+            <img src="tom_gauss_4.png" width="150" />
+        </tr>
+        <tr>
+          <td align="middle">
+            <img src="tom_spiderman.png" width="150" />
+          </td>
+          </td>
+          <td align="middle">
+            <img src="tom_lap_0.png" width="150" />
+          </td>
+          <td align="middle">
+            <img src="tom_lap_1.png" width="150" />
+          </td>
+          <td align="middle">
+            <img src="tom_lap_2.png" width="150" />
+          </td>
+          <td align="middle">
+            <img src="tom_lap_3.png" width="150" />
+          </td>
+          <td align="middle">
+            <img src="tom_lap_4.png" width="150" />
+          </td>
+        </tr>
+      </table>
+    </div>
+<h2 align="middle">Part 2.4: Multiresolution Blending</h2>
+    <img src="blend_formula.jpg" style="vertical-align: middle"/>
+    <div align="center">
+        <table style="width=100%">
+          <h3 align="middle">Orapple</h2>
+          <tr>
+            <td align="middle">
+              <img src="apple.jpeg" width="250" />
+            </td>
+            <td align="middle">
+              <img src="orange.jpeg" width="250" />
+            </td>
+            <td align="middle">
+              <img src="orapple.png" width="250" />
+            </td>
+            <td align="middle">
+              <img src="mask.jpg" width="250" />
+              <figcaption align="middle">Mask</figcaption>
+            </td>
+          </tr>
+        </table>
+        <table style="width=100%">
+          <h3 align="middle">Harry Styles amongst the Stars(Irregular Mask)</h2>
+          <tr>
+            <td align="middle">
+              <img src="harry.jpeg" width="250" />
+            </td>
+            <td align="middle">
+              <img src="archives_helix.jpg" width="250" />
+            </td>
+            <td align="middle">
+              <img src="harry_hybrid.png" width="250" />
+            </td>
+            <td align="middle">
+              <img src="circular_mask.png" width="250" />
+              <figcaption align="middle">Mask</figcaption>
+            </td>
+          </tr>
+        </table>
+        <table style="width=100%">
+          <h3 align="middle">Two Freedom fighters in one</h2>
+          <tr>
+            <td align="middle">
+              <img src="gandhi.jpg" width="250" />
+            </td>
+            <td align="middle">
+              <img src="luther.jpg" width="250" />
+            </td>
+            <td align="middle">
+              <img src="gandhi_luther.png" width="250" />
+            </td>
+            <td align="middle">
+              <img src="mask.jpg" width="250" />
+              <figcaption align="middle">Mask</figcaption>
+            </td>
+          </tr>
+        </table>
+        <table style="width=100%">
+          <p align="left">Here I have both the gaussian and lapalacian stack images for the harry styles hybrid photo after I have applied the circular mask.</p>
+              <tr>
+                  </td>
+                  <td align="middle">
+                    <img src="gas_0harry.jpg" width="200" />
+                  </td>
+                  <td align="middle">
+                    <img src="gas_1harry.jpg" width="200" />
+                  </td>
+                  <td align="middle">
+                    <img src="gas_2harry.jpg" width="200" />
+                  </td>
+                  <td align="middle">
+                    <img src="gas_3harry.jpg" width="200" />
+                  </td>
+                  <td align="middle">
+                    <img src="gas_4harry.jpg" width="200" />
+                  </td>
+              </tr>
+              <tr>
+                  </td>
+                  <td align="middle">
+                    <img src="lap_0harry.jpg" width="200" />
+                  </td>
+                  <td align="middle">
+                    <img src="lap_1harry.jpg" width="200" />
+                  </td>
+                  <td align="middle">
+                    <img src="lap_2harry.jpg" width="200" />
+                  </td>
+                  <td align="middle">
+                    <img src="lap_3harry.jpg" width="200" />
+                  </td>
+                  <td align="middle">
+                    <img src="lap_4harry.jpg" width="200" />
+                  </td>
+              </tr>
+        </table>
+      </div>
+
+</div>
+</body>
+</html>
